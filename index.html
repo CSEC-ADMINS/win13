@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Draggable Windows</title>
+<style>
+    #background {
+        background-image: url("0.png");
+        background-size: cover;
+        background-repeat: no-repeat;
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        z-index: -1;
+        top: 0;
+        left: 0;
+    }
+    .x:hover {
+        background-color: red;
+    }
+    .x {
+        border-radius: 5px;
+        position: absolute;
+        right: 10px;
+        background-color: #3c3c3c;
+        text-align: center;
+        cursor: pointer;
+    }
+    .win {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 10;
+        border-radius: 15px;
+        background-color: black;
+    }
+    .stripe {
+        position: relative;
+        height: 20px;
+        width: 100%;
+        background: #3c3c3c;
+        height: 25px;
+        border-top-left-radius: 15px;
+        border-top-right-radius: 15px;
+    }
+    #content {
+        position: absolute;
+        display: table;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 10;
+        background: transparent;
+    }
+    #tst {
+        display: table-cell;
+        height: 10px;
+        width: 10px;
+    }
+</style>
+</head>
+<body>
+<div id="background"></div>
+<div id="content">
+
+</div>
+
+<script>
+    function createwin(title, content, height, width) {
+        var randomId = 'win-' + Math.random().toString(36).substr(2, 9);
+        var main = document.createElement("div");
+        main.style.height = height + "px";
+        main.style.width = width + "px";
+        main.className = "win";
+        main.id = randomId;
+
+        var stripe = document.createElement("div");
+        stripe.className = "stripe";
+        main.appendChild(stripe);
+
+        var x = document.createElement("button");
+        x.className = "x";
+        x.innerHTML = "✕";
+        x.style.color = "white";
+        x.style.fontWeight = "900";
+        x.style.position = "absolute";
+        x.style.right = "10px";
+        x.onclick = function() {
+            var win = document.getElementById(randomId);
+            if (win) {
+                document.body.removeChild(win);
+            }
+        };
+        stripe.appendChild(x);
+
+        var titleElement = document.createElement("span");
+        titleElement.innerHTML = title;
+        titleElement.style.color = "white";
+        titleElement.style.fontWeight = "900";
+        titleElement.style.position = "absolute";
+        titleElement.style.left = "10px";
+        titleElement.style.lineHeight = "20px";
+        stripe.appendChild(titleElement);
+
+        var contentElement = document.createElement("div");
+        contentElement.innerHTML = content;
+        contentElement.style.height = (height - 20) + "px";
+        contentElement.style.width = width + "px";
+        contentElement.style.overflow = "auto";
+        main.appendChild(contentElement);
+
+        document.body.appendChild(main);
+
+        stripe.onmousedown = function(ev) {
+            var startX = ev.clientX;
+            var startY = ev.clientY;
+            var origX = main.offsetLeft;
+            var origY = main.offsetTop;
+
+            function onMouseMove(ev) {
+                main.style.left = (origX + ev.clientX - startX) + 'px';
+                main.style.top = (origY + ev.clientY - startY) + 'px';
+                
+            }
+
+            function onMouseUp() {
+    document.removeEventListener('mousemove', onMouseMove);
+    document.removeEventListener('mouseup', onMouseUp);
+
+    // Ensure the window stays within the viewport bounds
+    var maxTop = window.innerHeight - main.offsetHeight;
+    var maxLeft = window.innerWidth - main.offsetWidth;
+
+    // Adjust the top position if it's out of bounds
+    if (main.offsetTop > maxTop) {
+        main.style.top = maxTop + 'px';
+    } else if (main.offsetTop < 0) {
+        main.style.top = '0px';
+    }else if (main.offsetLeft > maxLeft) {
+        main.style.left = maxLeft + 'px';
+    } else if (main.offsetLeft < 0) {
+        main.style.left = '0px';
+    }
+}
+
+
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        };
+    }
+
+    var i = 0;
+    setInterval(function() {
+        document.getElementById("background").style.backgroundImage = "url(" + i + ".png)";
+        i = (i + 1) % 100; // Loop through images 0.png to 99.png
+    }, 60000);
+
+    // Example usage of createwin function
+    createwin('My Window', 'This is the content of my window.', 300, 400);
+</script>
+</body>
+</html>
